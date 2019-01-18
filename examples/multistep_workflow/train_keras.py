@@ -35,7 +35,7 @@ def train_keras(ratings_data, als_model_uri, hidden_units):
     tf.set_random_seed(42)  # For reproducibility
 
     spark = pyspark.sql.SparkSession.builder.getOrCreate()
-    als_model = mlflow.spark.load_model(als_model_uri).stages[0]
+    als_model = PipelineModel.load(als_model_uri).stages[0]
 
     ratings_df = spark.read.parquet(ratings_data)
 
