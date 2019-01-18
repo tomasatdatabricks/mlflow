@@ -21,7 +21,7 @@ entry_points:
 
   train_keras:
     parameters:
-      ratings_data: path
+      ratings_data: string
       als_model_uri: string
       hidden_units: {type: int, default: 20}
     command: "python train_keras.py --ratings-data {ratings_data} --als-model-uri {als_model_uri} --hidden-units {hidden_units}"
