@@ -15,6 +15,7 @@ from itertools import chain
 import pyspark
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
+from pyspark.ml.pipeline import PipelineModel
 
 import tensorflow as tf
 import keras
