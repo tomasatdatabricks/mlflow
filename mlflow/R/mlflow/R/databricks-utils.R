@@ -94,32 +94,6 @@ get_databricks_config <- function(profile) {
   config
 }
 
-mlflow_get_run_context.mlflow_databricks_client <- function(client, source_name, source_version,
-                                                            source_type, experiment_id, ...) {
-  if (exists(".databricks_internals")) {
-    notebook_info <- do.call(".get_notebook_info", list(), envir = .databricks_internals)
-    if (!is.na(notebook_info$id) && !is.na(notebook_info$path)) {
-      tags <- list()
-      tags[[MLFLOW_DATABRICKS_TAGS$MLFLOW_DATABRICKS_NOTEBOOK_ID]] <- notebook_info$id
-      tags[[MLFLOW_DATABRICKS_TAGS$MLFLOW_DATABRICKS_NOTEBOOK_PATH]] <- notebook_info$path
-      tags[[MLFLOW_DATABRICKS_TAGS$MLFLOW_DATABRICKS_WEBAPP_URL]] <- notebook_info$webapp_url
-      list(
-        client = client,
-        source_version = source_version %||% get_source_version(),
-        source_type =  MLFLOW_SOURCE_TYPE$NOTEBOOK,
-        source_name = notebook_info$path,
-        tags = tags,
-        experiment_id = experiment_id %||% notebook_info$id,
-        ...
-      )
-    } else {
-      NextMethod()
-    }
-  } else {
-    NextMethod()
-  }
-}
-
 MLFLOW_DATABRICKS_TAGS <- list(
   MLFLOW_DATABRICKS_NOTEBOOK_ID = "mlflow.databricks.notebookID",
   MLFLOW_DATABRICKS_NOTEBOOK_PATH = "mlflow.databricks.notebookPath",
@@ -128,3 +102,23 @@ MLFLOW_DATABRICKS_TAGS <- list(
   MLFLOW_DATABRICKS_SHELL_JOB_ID = "mlflow.databricks.shellJobID",
   MLFLOW_DATABRICKS_SHELL_JOB_RUN_ID = "mlflow.databricks.shellJobRunID"
 )
+
+
+
+mlflow_get_run_context.mlflow_databricks_client <- function(client, source_name, source_version,
+                                                            source_type, experiment_id, ...) {
+  res <- NextMethod()
+  if (exists(".databricks_internals")) {
+    notebook_info <- do.call(".get_notebook_info", list(), envir = .databricks_internals)
+    if (!is.na(notebook_info$id) && !is.na(notebook_info$path)) {
+      res$tags[[MLFLOW_DATABRICKS_TAGS$MLFLOW_DATABRICKS_NOTEBOOK_ID]] <- notebook_info$id
+      res$tags[[MLFLOW_DATABRICKS_TAGS$MLFLOW_DATABRICKS_NOTEBOOK_PATH]] <- notebook_info$path
+      res$tags[[MLFLOW_DATABRICKS_TAGS$MLFLOW_DATABRICKS_WEBAPP_URL]] <- notebook_info$webapp_url
+      res$tags[[MLFLOW_TAGS$MLFLOW_SOURCE_TYPE]] <- MLFLOW_SOURCE_TYPE$NOTEBOOK
+      res$tags[[MLFLOW_TAGS$SOURCE_NAME]] <- notebook_info$path
+      res$experiment_id = experiment_id %||% notebook_info$id
+    }
+  }
+  res
+}
+

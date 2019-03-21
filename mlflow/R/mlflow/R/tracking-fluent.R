@@ -60,7 +60,7 @@ mlflow_set_experiment <- function(experiment_name) {
 #' @export
 mlflow_start_run <- function(run_uuid = NULL, experiment_id = NULL, source_name = NULL,
                              source_version = NULL, entry_point_name = NULL,
-                             source_type = "LOCAL") {
+                             source_type = MLFLOW_SOURCE_TYPE$LOCAL) {
   active_run <- mlflow_active_run()
   if (!is.null(active_run)) {
     stop("Run with UUID ", active_run_id(), " is already active.",
@@ -79,34 +79,43 @@ mlflow_start_run <- function(run_uuid = NULL, experiment_id = NULL, source_name 
     experiment_id <- experiment_id %||% mlflow_get_active_experiment_id()
     experiment_id <- experiment_id %||% Sys.getenv("MLFLOW_EXPERIMENT_ID", unset = NA)
     experiment_id <- if (is.na(experiment_id)) NULL else experiment_id
+    if (!is.null(source_name) {
+        tags[[MLFLOW_TAGS$MLFLOW_SOURCE_NAME]] <- source_name
+    }
+    if (!is.null(source_type)) {
+        tags[[MLFLOW_TAGS$MLFLOW_SOURCE_TYPE]] <- mlflow_sourcetype_to_string(source_type)
+    }
+    if (!is.null(source_version)) {
+        tags[[MLFLOW_TAGS$MLFLOW_GIT_COMMIT]] <- source_version
+    }
+    if (!is.null(entry_point_name)) {
+        tags[[MLFLOW_TAGS$MLFLOW_PROJECT_ENTRY_POINT]] <- entry_point_name
+    }
     client <- mlflow_client()
     args <- mlflow_get_run_context(
       client,
       experiment_id = experiment_id,
-      source_name = source_name,
-      source_version = source_version,
-      entry_point_name = entry_point_name,
-      source_type = source_type
+      tags
     )
     do.call(mlflow_client_create_run, args)
   }
   mlflow_set_active_run(run)
 }
 
-
 mlflow_get_run_context <- function(client, ...) {
   UseMethod("mlflow_get_run_context")
 }
 
-mlflow_get_run_context.default <- function(client, source_name, source_version, experiment_id,
-                                           ...) {
-  list(client = client,
-       source_name = source_name %||% get_source_name(),
-       source_version = source_version %||% get_source_version(),
-       experiment_id = experiment_id %||% 0,
-       ...)
+mlflow_get_run_context.default <- function(client, experiment_id, tags, ...) {
+  if (!MLFLOW_TAGS$MLFLOW_SOURCE_NAME %in% tags) {
+    tags[[MLFLOW_TAGS$MLFLOW_SOURCE_NAME]] <- get_source_name()
+  }
+  if (!MLFLOW_TAGS$MLFLOW_SOURCE_VERSION %in% tags) {
+    tags[[MLFLOW_TAGS$MLFLOW_SOURCE_VERSION]] <- get_source_version()
+  }
+  experiment_id <- experiment_id %||% 0
+  list(client = client, experiment_id = experiment_id, tags = tags, ...)
 }
-
 
 #' Log Metric
 #'

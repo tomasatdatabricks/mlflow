@@ -212,11 +212,9 @@ mlflow_client_get_experiment_by_name <- function(client, name) {
 #' @param entry_point_name Name of the entry point for the run.
 #' @param tags Additional metadata for run in key-value pairs.
 #' @template roxlate-client
+
 mlflow_client_create_run <- function(
-  client, experiment_id, user_id = NULL, run_name = NULL, source_type = NULL,
-  source_name = NULL, entry_point_name = NULL, start_time = NULL,
-  source_version = NULL, tags = NULL
-) {
+  client, experiment_id, user_id = NULL, run_name = NULL, start_time = NULL, tags = NULL) {
   tags <- if (!is.null(tags)) tags %>%
     purrr::imap(~ list(key = .y, value = .x)) %>%
     unname()
@@ -230,11 +228,7 @@ mlflow_client_create_run <- function(
       experiment_id = experiment_id,
       user_id = user_id,
       run_name = run_name,
-      source_type = source_type,
-      source_name = source_name,
-      entry_point_name = entry_point_name,
       start_time = start_time,
-      source_version = source_version,
       tags = tags
     )
   )

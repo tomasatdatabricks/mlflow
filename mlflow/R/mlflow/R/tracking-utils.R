@@ -94,6 +94,15 @@ mlflow_user <- function() {
     "unknown"
 }
 
+mlflow_sourcetype_to_string <- function(source_type) {
+   res <- names(MLFLOW_SOURCE_TYPE)[which(MLFLOW_SOURCE_TYPE == source_type)]
+   if (length(res) != 1) {
+     stop(paste("Indalid source type '", source_type, "'. Expected one of mlflow_source_types.",
+                sep = ""))
+   }
+   res
+}
+
 MLFLOW_SOURCE_TYPE <- list(
   NOTEBOOK = 1,
   JOB = 2,
@@ -101,3 +110,28 @@ MLFLOW_SOURCE_TYPE <- list(
   LOCAL = 4,
   UNKNOWN = 5
 )
+
+MLFLOW_TAGS = list(
+  MLFLOW_RUN_NAME = "mlflow.runName",
+  MLFLOW_PARENT_RUN_ID = "mlflow.parentRunId",
+  MLFLOW_SOURCE_TYPE = "mlflow.source.type",
+  MLFLOW_SOURCE_NAME = "mlflow.source.name",
+  MLFLOW_GIT_COMMIT = "mlflow.source.git.commit",
+  MLFLOW_GIT_BRANCH = "mlflow.source.git.branch",
+  MLFLOW_GIT_REPO_URL = "mlflow.source.git.repoURL",
+  MLFLOW_PROJECT_ENV = "mlflow.project.env",
+  MLFLOW_PROJECT_ENTRY_POINT = "mlflow.project.entryPoint",
+  MLFLOW_DOCKER_IMAGE_NAME = "mlflow.docker.image.name",
+  MLFLOW_DOCKER_IMAGE_ID = "mlflow.docker.image.id"
+)
+
+#' @export
+mlflow_source_type <- function() {
+  list(MLFLOW_SOURCE_TYPE)
+}
+
+#' @export
+mlflow_tag <- function() {
+  list(MLFLOW_TAG)
+}
+
