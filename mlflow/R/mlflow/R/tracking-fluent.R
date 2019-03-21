@@ -95,7 +95,7 @@ mlflow_start_run <- function(run_uuid = NULL, experiment_id = NULL, source_name 
     args <- mlflow_get_run_context(
       client,
       experiment_id = experiment_id,
-      tags
+      tags = tags
     )
     do.call(mlflow_client_create_run, args)
   }
